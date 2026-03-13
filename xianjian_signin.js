@@ -33,10 +33,10 @@ const ACCOUNTS = [
         password: "cgm19930716",           // 密码
         // 角色信息（首次使用需要填写，后续会自动保存）
         // 如果不知道角色信息，可以留空，脚本会尝试自动获取
-        role_id: "",                       // 角色ID（可选）
-        role_name: "",                     // 角色名称（可选）
-        server_id: "",                     // 服务器ID（可选）
-        server_name: "",                   // 服务器名称（可选）
+        role_id: "1410682267143104932",                       // 角色ID（可选）
+        role_name: "node",                     // 角色名称（可选）
+        server_id: "20047",                     // 服务器ID（可选）
+        server_name: "Q0047 身世浮沉",                   // 服务器名称（可选）
         platform: "android",               // 平台（android/ios）
         page_id: "8",                      // 页面ID（通常固定为8）
         game_id: "69",                     // 游戏ID（通常固定为69）
@@ -383,4 +383,5 @@ main().catch(error => {
     sendNotification("仙剑签到", "执行异常", error.message);
     $done({ title: "仙剑签到", message: "执行异常: " + error.message });
 });
+
 
