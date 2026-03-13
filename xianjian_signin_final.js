@@ -17,12 +17,12 @@ const ACCOUNTS = [
         app_id: "58"
     },
     {
-        username: "13569284921",
+        username: "18610509630",
         password: "cgm19930717",
         role_id: "1410682267143104933",
-        role_name: "node2",
+        role_name: "Capybara",
         server_id: "20048",
-        server_name: "Q0048 新手区",
+        server_name: "Q0047 身世浮沉",
         platform: "android",
         page_id: "8",
         game_id: "69",
@@ -358,3 +358,4 @@ main().catch(error => {
     log(`脚本执行异常: ${error.message}`);
     $done({ title: "仙剑签到", message: "执行异常: " + error.message });
 });
+
