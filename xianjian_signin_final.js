@@ -4,7 +4,7 @@
  * 使用方法：
  * 1. 在圈X配置文件的 [Task_local] 中添加：
  *    # 仙剑签到
- *    0 8 * * * https://脚本路径/xianjian_signin.js, tag=仙剑签到, enabled=true
+ *    0 8 * * * https://raw.githubusercontent.com/ala-stone/xianjian/refs/heads/main/xianjian_signin_final.js, tag=仙剑签到, enabled=true
  */
 
 
@@ -342,4 +342,5 @@ main().catch(error => {
     log(`脚本执行异常: ${error.message}`);
     $done({ title: "仙剑签到", message: "执行异常: " + error.message });
 });
+
 
