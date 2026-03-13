@@ -4,7 +4,7 @@
  * 
  * 使用方法：
  * 1. 在圈X配置文件的 [rewrite_local] 中添加：
- *    https://h5.qingcigame.com/package/template/enter57nqi9z9xcn url script-request-body https://raw.githubusercontent.com/ala-stone/xianjian/refs/heads/main/xianjian_capture.js
+ *    https://h5.qingcigame.com/package/template/enter57nqi9z9xcn url script-request-body xianjian_capture.js
  * 2. 在 [mitm] 中添加：
  *    hostname = h5.qingcigame.com
  * 3. 用 Safari 打开网页，手动登录和签到
@@ -37,4 +37,3 @@ if ($request) {
 }
 
 $done();
-
