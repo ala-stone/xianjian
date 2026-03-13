@@ -18,7 +18,7 @@
  * 使用方法：
  * 1. 在圈X配置文件的 [Task_local] 中添加：
  *    # 仙剑签到
- *    0 8 * * * https://raw.githubusercontent.com/ala-stone/xianjian/refs/heads/main/xianjian_signin.js, tag=仙剑签到, enabled=true
+ *    0 8 * * * https://脚本路径/xianjian_signin.js, tag=仙剑签到, enabled=true
  * 
  * 2. 脚本配置：
  *    在脚本顶部修改账号配置
@@ -31,16 +31,16 @@ const ACCOUNTS = [
     {
         username: "13569284920",          // 账号（手机号）
         password: "cgm19930716",           // 密码
-        // 角色信息（首次使用需要填写，后续会自动保存）
-        // 如果不知道角色信息，可以留空，脚本会尝试自动获取
-        role_id: "1410682267143104932",                       // 角色ID（可选）
-        role_name: "node",                     // 角色名称（可选）
-        server_id: "20047",                     // 服务器ID（可选）
-        server_name: "Q0047 身世浮沉",                   // 服务器名称（可选）
+        // 角色信息（从绑定接口获取）
+        role_id: "1410682267143104932",   // 角色ID（必需）
+        role_name: "node",                 // 角色名称
+        server_id: "20047",                // 服务器ID
+        server_name: "Q0047 身世浮沉",     // 服务器名称
         platform: "android",               // 平台（android/ios）
         page_id: "8",                      // 页面ID（通常固定为8）
         game_id: "69",                     // 游戏ID（通常固定为69）
-        app_id: "58"                       // 应用ID（通常固定为58）
+        app_id: "58",                      // 应用ID（通常固定为58）
+        user_id: "29383179"                // 用户ID（从登录接口获取）
     },
     // 如需添加更多账号，复制上面的配置块
     // {
@@ -53,7 +53,8 @@ const ACCOUNTS = [
     //     platform: "android",
     //     page_id: "8",
     //     game_id: "69",
-    //     app_id: "58"
+    //     app_id: "58",
+    //     user_id: ""
     // }
 ];
 
@@ -322,6 +323,16 @@ async function doBindRole(account, cookie) {
  * @returns {Promise<Object>} - 签到结果
  */
 async function doSignIn(account, cookie, roleInfo) {
+    // 构建签到参数
+    let bodyParams = `app_id=${account.app_id}&page_id=${account.page_id}&game_id=${account.game_id}`;
+    
+    // 如果有角色信息，添加角色相关参数
+    if (roleInfo && roleInfo.role_id) {
+        bodyParams += `&role_id=${roleInfo.role_id}`;
+    }
+    
+    log(`  → 签到参数: ${bodyParams}`);
+
     const options = {
         url: SIGNIN_URL,
         method: "POST",
@@ -333,11 +344,16 @@ async function doSignIn(account, cookie, roleInfo) {
             "Accept": "*/*",
             "Cookie": cookie
         },
-        body: `app_id=${account.app_id}&page_id=${account.page_id}&game_id=${account.game_id}`
+        body: bodyParams
     };
 
     try {
+        log(`  → 发送签到请求...`);
         const response = await $task.fetch(options);
+        
+        log(`  → 响应状态: ${response.statusCode}`);
+        log(`  → 响应内容: ${response.body}`);
+        
         const body = JSON.parse(response.body);
 
         if (body.code === 200) {
@@ -352,6 +368,7 @@ async function doSignIn(account, cookie, roleInfo) {
             };
         }
     } catch (error) {
+        log(`  → 请求异常: ${error.message}`);
         return {
             success: false,
             message: `签到请求失败: ${error.message}`
@@ -383,8 +400,3 @@ main().catch(error => {
     sendNotification("仙剑签到", "执行异常", error.message);
     $done({ title: "仙剑签到", message: "执行异常: " + error.message });
 });
-
-
-
-
-
