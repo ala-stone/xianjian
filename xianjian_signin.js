@@ -29,7 +29,7 @@
 // 账号配置（支持多个账号）
 const ACCOUNTS = [
     {
-        username: "13569284920",          // 账号（手机号）
+        username: "18610509630",          // 账号（手机号）
         password: "cgm19930716",           // 密码
         // 角色信息（首次使用需要填写，后续会自动保存）
         // 如果不知道角色信息，可以留空，脚本会尝试自动获取
@@ -383,5 +383,6 @@ main().catch(error => {
     sendNotification("仙剑签到", "执行异常", error.message);
     $done({ title: "仙剑签到", message: "执行异常: " + error.message });
 });
+
 
 
