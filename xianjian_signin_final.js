@@ -20,7 +20,7 @@ const ACCOUNTS = [
         page_id: "8",
         game_id: "69",
         app_id: "58"
-    }
+    },
     {
         username: "18610509630",
         password: "cgm19930716",
@@ -354,6 +354,7 @@ main().catch(error => {
     log(`脚本执行异常: ${error.message}`);
     $done({ title: "仙剑签到", message: "执行异常: " + error.message });
 });
+
 
 
 
