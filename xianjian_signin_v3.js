@@ -1,7 +1,9 @@
 /**
- * 仙剑H5自动签到脚本 - 最终版本
- * 智能判断签到状态
+ * 仙剑H5自动签到脚本 - V3版本
+ * 完整模拟浏览器流程
  */
+
+// ================= 配置区域 =================
 
 const ACCOUNTS = [
     {
@@ -15,110 +17,110 @@ const ACCOUNTS = [
         page_id: "8",
         game_id: "69",
         app_id: "58"
-    },
-    {
-        username: "13569284921",
-        password: "cgm19930717",
-        role_id: "1410682267143104933",
-        role_name: "node2",
-        server_id: "20048",
-        server_name: "Q0048 新手区",
-        platform: "android",
-        page_id: "8",
-        game_id: "69",
-        app_id: "58"
     }
 ];
 
+// ================= 配置结束 =================
+
 const API_BASE = "https://api.qingcigame.com";
 const LOGIN_URL = `${API_BASE}/snail/login/account`;
-const SIGN_LIST_URL = `${API_BASE}/game/sign/list`;
+const SIGN_LIST_URL = `${API_BASE}/game/sign/list`;  // 获取签到列表
 const BIND_ROLE_URL = `${API_BASE}/game/binds`;
 const SIGNIN_URL = `${API_BASE}/game/sign/record`;
 
 let successCount = 0;
 let failCount = 0;
-let skipCount = 0;
+let messageLog = [];
 
+/**
+ * 主函数
+ */
 async function main() {
     log("========================================");
-    log("仙剑H5自动签到脚本 - 最终版本");
+    log("仙剑H5自动签到脚本 - V3版本");
     log(`时间: ${new Date().toLocaleString()}`);
-    log(`账号数量: ${ACCOUNTS.length}`);
     log("========================================\n");
 
-    // 遍历所有账号
-    for (let i = 0; i < ACCOUNTS.length; i++) {
-        const account = ACCOUNTS[i];
-        log(`【账号 ${i + 1}/${ACCOUNTS.length}】${account.username}`);
+    const account = ACCOUNTS[0];
+    log(`【账号】${account.username}`);
+    log("");
+
+    try {
+        // 1. 登录
+        log("【步骤1】登录...");
+        const loginResult = await doLogin(account);
+        if (!loginResult.success) {
+            throw new Error(loginResult.message);
+        }
+        const cookie = loginResult.cookie;
+        const userId = loginResult.user_id;
+        log(`✓ 登录成功，user_id: ${userId}`);
         log("");
 
-        try {
-            // 1. 登录
-            log("【步骤1】登录...");
-            const loginResult = await doLogin(account);
-            if (!loginResult.success) {
-                throw new Error(loginResult.message);
-            }
-            let cookie = loginResult.cookie;
-            log(`✓ 登录成功`);
-            log("");
+        // 2. 获取签到列表（模拟浏览器行为）
+        log("【步骤2】获取签到列表...");
+        const listResult = await getSignList(account, cookie, userId);
+        log("");
 
-            // 2. 绑定角色
-            log("【步骤2】绑定角色...");
-            const bindResult = await doBindRole(account, cookie);
-            if (bindResult.success) {
-                log(`✓ 角色绑定成功`);
-                if (bindResult.newCookie) {
-                    cookie = bindResult.newCookie;
-                    log(`  → Cookie已更新`);
-                }
-            } else {
-                log(`  → 角色绑定: ${bindResult.message}`);
-            }
-            log("");
+        // 3. 绑定角色
+        log("【步骤3】绑定角色...");
+        const bindResult = await doBindRole(account, cookie);
+        if (bindResult.success) {
+            log(`✓ 角色绑定成功`);
+        } else {
+            log(`✗ 角色绑定失败: ${bindResult.message}`);
+        }
+        log("");
 
-            // 3. 检查签到状态
-            log("【步骤3】检查签到状态...");
-            const listResult = await getSignList(account, cookie);
-            log("");
+        // 4. 再次获取签到列表（绑定后）
+        log("【步骤4】绑定后获取签到列表...");
+        const listResult2 = await getSignList(account, cookie, userId);
+        log("");
 
-            // 4. 根据状态决定是否签到
-            if (listResult.success && listResult.isSignedToday) {
-                log(`✓ 今日已签到，跳过签到`);
-                skipCount++;
-                log(`  → 累计签到: ${listResult.signTotal} 天`);
-            } else if (listResult.success && !listResult.isSignedToday) {
-                log(`→ 今日未签到，开始签到...`);
-                log(`  → 当前累计: ${listResult.signTotal} 天`);
-                log("");
-
-                // 5. 执行签到
-                log("【步骤4】执行签到...");
-                const signInResult = await doSignIn(account, cookie);
-                log("");
-
-                if (signInResult.success) {
-                    log(`✓ 签到成功: ${signInResult.message}`);
-                    successCount++;
-                } else {
-                    log(`✗ 签到失败: ${signInResult.message}`);
-                    failCount++;
-                }
-            } else {
-                log(`✗ 无法获取签到状态: ${listResult.message}`);
-                failCount++;
-            }
-
-        } catch (error) {
-            log(`✗ 执行出错: ${error.message}`);
+        // 5. 尝试签到（不同的参数组合）
+        log("【步骤5】尝试签到...");
+        
+        // 方案1: 只传基础参数（参考Python测试）
+        log("【方案1】基础参数（app_id, page_id, game_id）");
+        let result1 = await doSignIn(account, cookie, `app_id=${account.app_id}&page_id=${account.page_id}&game_id=${account.game_id}`);
+        
+        // 方案2: 添加 role_id
+        log("【方案2】添加 role_id");
+        let result2 = await doSignIn(account, cookie, `app_id=${account.app_id}&page_id=${account.page_id}&game_id=${account.game_id}&role_id=${account.role_id}`);
+        
+        // 方案3: 添加 user_id 和 role_id
+        log("【方案3】添加 user_id 和 role_id");
+        let result3 = await doSignIn(account, cookie, `app_id=${account.app_id}&page_id=${account.page_id}&game_id=${account.game_id}&user_id=${userId}&role_id=${account.role_id}`);
+        
+        // 方案4: 所有参数
+        log("【方案4】所有参数");
+        let result4 = await doSignIn(account, cookie, `app_id=${account.app_id}&page_id=${account.page_id}&game_id=${account.game_id}&user_id=${userId}&role_id=${account.role_id}&server_id=${account.server_id}&server_name=${encodeURIComponent(account.server_name)}`);
+        
+        log("");
+        
+        // 找出哪个成功了
+        if (result1.success) {
+            log(`✓ 方案1成功: ${result1.message}`);
+            successCount++;
+        } else if (result2.success) {
+            log(`✓ 方案2成功: ${result2.message}`);
+            successCount++;
+        } else if (result3.success) {
+            log(`✓ 方案3成功: ${result3.message}`);
+            successCount++;
+        } else if (result4.success) {
+            log(`✓ 方案4成功: ${result4.message}`);
+            successCount++;
+        } else {
+            log(`✗ 所有方案都失败了`);
             failCount++;
+            messageLog.push(`账号${account.username}: 签到失败`);
         }
 
-        // 账号之间添加分隔符（最后一个账号除外）
-        if (i < ACCOUNTS.length - 1) {
-            log("\n" + "-".repeat(40) + "\n");
-        }
+    } catch (error) {
+        log(`✗ 执行出错: ${error.message}`);
+        failCount++;
+        messageLog.push(`账号${account.username}: ${error.message}`);
     }
 
     const summary = `
@@ -127,20 +129,27 @@ async function main() {
     时间: ${new Date().toLocaleString()}
     成功: ${successCount} 个
     失败: ${failCount} 个
-    跳过: ${skipCount} 个（今日已签到）
     ========================================`;
 
     log(summary);
 
-    if (successCount > 0 || failCount > 0 || skipCount > 0) {
-        $notify("仙剑签到", "签到完成", `成功${successCount} 失败${failCount} 跳过${skipCount}`);
+    if (successCount > 0) {
+        $notify("仙剑签到", "签到完成", `成功 ${successCount} 个，失败 ${failCount} 个`);
+    } else if (failCount > 0) {
+        $notify("仙剑签到", "签到完成", `成功 ${successCount} 个，失败 ${failCount} 个`);
     }
 
-    $done({ title: "仙剑签到", message: `成功${successCount} 失败${failCount} 跳过${skipCount}` });
+    $done({ title: "仙剑签到", message: `成功 ${successCount} 个，失败 ${failCount} 个` });
 }
 
-async function getSignList(account, cookie) {
+/**
+ * 获取签到列表
+ */
+async function getSignList(account, cookie, userId) {
+    // 使用GET方法，参数在URL中
     let url = `${SIGN_LIST_URL}?app_id=${account.app_id}&game_id=${account.game_id}`;
+    
+    // 如果有role_id，添加role_id参数
     if (account.role_id) {
         url += `&role_id=${account.role_id}`;
     }
@@ -161,39 +170,25 @@ async function getSignList(account, cookie) {
 
     try {
         const response = await $task.fetch(options);
-        const body = JSON.parse(response.body);
+        log(`  状态: ${response.statusCode}`);
         
-        if (body.code === 200 && body.data) {
-            log(`  ✓ 获取签到状态成功`);
-            log(`  → 累计签到: ${body.data.sign_total || 0} 天`);
-            log(`  → 今日已签到: ${body.data.is_get ? '是' : '否'}`);
-            
-            return {
-                success: true,
-                isSignedToday: body.data.is_get === true || body.data.is_get === "1",
-                signTotal: body.data.sign_total || 0,
-                message: "获取成功"
-            };
+        const body = JSON.parse(response.body);
+        if (body.code === 200) {
+            log(`  ✓ 获取成功，累计签到: ${body.data?.sign_total || 0} 天，今日已签到: ${body.data?.is_get ? '是' : '否'}`);
+            return { success: true, data: body.data };
         } else {
             log(`  ✗ 获取失败: ${body.message}`);
-            return {
-                success: false,
-                isSignedToday: false,
-                signTotal: 0,
-                message: body.message || "获取失败"
-            };
+            return { success: false, message: body.message };
         }
     } catch (error) {
         log(`  ✗ 请求失败: ${error.message}`);
-        return {
-            success: false,
-            isSignedToday: false,
-            signTotal: 0,
-            message: error.message
-        };
+        return { success: false, message: error.message };
     }
 }
 
+/**
+ * 执行登录
+ */
 async function doLogin(account) {
     const body = `account=${account.username}&password=${account.password}`;
     
@@ -226,13 +221,13 @@ async function doLogin(account) {
             }
         }
 
-        const responseBody = JSON.parse(response.body);
+        const body = JSON.parse(response.body);
 
-        if (responseBody.code === 200 && responseBody.data) {
+        if (body.code === 200 && body.data) {
             return {
                 success: true,
                 cookie: cookie,
-                user_id: responseBody.data.user_id || null,
+                user_id: body.data.user_id || null,
                 message: "登录成功"
             };
         } else {
@@ -240,7 +235,7 @@ async function doLogin(account) {
                 success: false,
                 cookie: null,
                 user_id: null,
-                message: responseBody.message || "登录失败"
+                message: body.message || "登录失败"
             };
         }
     } catch (error) {
@@ -253,6 +248,9 @@ async function doLogin(account) {
     }
 }
 
+/**
+ * 绑定角色
+ */
 async function doBindRole(account, cookie) {
     const body = `account=${account.username}&page_id=${account.page_id}&game_id=${account.game_id}&type=${account.platform}&role_id=${account.role_id}&role_name=${encodeURIComponent(account.role_name)}&server_id=${account.server_id}&server_name=${encodeURIComponent(account.server_name)}&platform=${account.platform}&extra=`;
 
@@ -272,50 +270,34 @@ async function doBindRole(account, cookie) {
 
     try {
         const response = await $task.fetch(options);
-        
-        let newCookie = null;
-        const setCookieHeader = response.headers["Set-Cookie"] || response.headers["set-cookie"];
-        if (setCookieHeader) {
-            const cookies = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
-            for (const c of cookies) {
-                const match = c.match(/PHPSESSID=([^;]+)/);
-                if (match) {
-                    newCookie = `PHPSESSID=${match[1]}`;
-                    break;
-                }
-            }
-        }
+        const body = JSON.parse(response.body);
 
-        const responseBody = JSON.parse(response.body);
-
-        if (responseBody.code === 200) {
+        if (body.code === 200) {
             return {
                 success: true,
-                newCookie: newCookie,
                 roleInfo: account,
                 message: "绑定成功"
             };
         } else {
             return {
                 success: false,
-                newCookie: null,
                 roleInfo: null,
-                message: responseBody.message || "绑定失败"
+                message: body.message || "绑定失败"
             };
         }
     } catch (error) {
         return {
             success: false,
-            newCookie: null,
             roleInfo: null,
             message: `绑定请求失败: ${error.message}`
         };
     }
 }
 
-async function doSignIn(account, cookie) {
-    const body = `app_id=${account.app_id}&page_id=${account.page_id}&game_id=${account.game_id}`;
-    
+/**
+ * 执行签到
+ */
+async function doSignIn(account, cookie, body) {
     log(`  Body: ${body}`);
     
     const options = {

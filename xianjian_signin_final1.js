@@ -15,18 +15,6 @@ const ACCOUNTS = [
         page_id: "8",
         game_id: "69",
         app_id: "58"
-    },
-    {
-        username: "13569284921",
-        password: "cgm19930717",
-        role_id: "1410682267143104933",
-        role_name: "node2",
-        server_id: "20048",
-        server_name: "Q0048 新手区",
-        platform: "android",
-        page_id: "8",
-        game_id: "69",
-        app_id: "58"
     }
 ];
 
@@ -44,81 +32,72 @@ async function main() {
     log("========================================");
     log("仙剑H5自动签到脚本 - 最终版本");
     log(`时间: ${new Date().toLocaleString()}`);
-    log(`账号数量: ${ACCOUNTS.length}`);
     log("========================================\n");
 
-    // 遍历所有账号
-    for (let i = 0; i < ACCOUNTS.length; i++) {
-        const account = ACCOUNTS[i];
-        log(`【账号 ${i + 1}/${ACCOUNTS.length}】${account.username}`);
+    const account = ACCOUNTS[0];
+    log(`【账号】${account.username}`);
+    log("");
+
+    try {
+        // 1. 登录
+        log("【步骤1】登录...");
+        const loginResult = await doLogin(account);
+        if (!loginResult.success) {
+            throw new Error(loginResult.message);
+        }
+        let cookie = loginResult.cookie;
+        log(`✓ 登录成功`);
         log("");
 
-        try {
-            // 1. 登录
-            log("【步骤1】登录...");
-            const loginResult = await doLogin(account);
-            if (!loginResult.success) {
-                throw new Error(loginResult.message);
+        // 2. 绑定角色
+        log("【步骤2】绑定角色...");
+        const bindResult = await doBindRole(account, cookie);
+        if (bindResult.success) {
+            log(`✓ 角色绑定成功`);
+            if (bindResult.newCookie) {
+                cookie = bindResult.newCookie;
+                log(`  → Cookie已更新`);
             }
-            let cookie = loginResult.cookie;
-            log(`✓ 登录成功`);
+        } else {
+            log(`  → 角色绑定: ${bindResult.message}`);
+        }
+        log("");
+
+        // 3. 检查签到状态
+        log("【步骤3】检查签到状态...");
+        const listResult = await getSignList(account, cookie);
+        log("");
+
+        // 4. 根据状态决定是否签到
+        if (listResult.success && listResult.isSignedToday) {
+            log(`✓ 今日已签到，跳过签到`);
+            skipCount++;
+            log(`  → 累计签到: ${listResult.signTotal} 天`);
+        } else if (listResult.success && !listResult.isSignedToday) {
+            log(`→ 今日未签到，开始签到...`);
+            log(`  → 当前累计: ${listResult.signTotal} 天`);
+            log("");
+            
+            // 5. 执行签到
+            log("【步骤4】执行签到...");
+            const signInResult = await doSignIn(account, cookie);
             log("");
 
-            // 2. 绑定角色
-            log("【步骤2】绑定角色...");
-            const bindResult = await doBindRole(account, cookie);
-            if (bindResult.success) {
-                log(`✓ 角色绑定成功`);
-                if (bindResult.newCookie) {
-                    cookie = bindResult.newCookie;
-                    log(`  → Cookie已更新`);
-                }
+            if (signInResult.success) {
+                log(`✓ 签到成功: ${signInResult.message}`);
+                successCount++;
             } else {
-                log(`  → 角色绑定: ${bindResult.message}`);
-            }
-            log("");
-
-            // 3. 检查签到状态
-            log("【步骤3】检查签到状态...");
-            const listResult = await getSignList(account, cookie);
-            log("");
-
-            // 4. 根据状态决定是否签到
-            if (listResult.success && listResult.isSignedToday) {
-                log(`✓ 今日已签到，跳过签到`);
-                skipCount++;
-                log(`  → 累计签到: ${listResult.signTotal} 天`);
-            } else if (listResult.success && !listResult.isSignedToday) {
-                log(`→ 今日未签到，开始签到...`);
-                log(`  → 当前累计: ${listResult.signTotal} 天`);
-                log("");
-
-                // 5. 执行签到
-                log("【步骤4】执行签到...");
-                const signInResult = await doSignIn(account, cookie);
-                log("");
-
-                if (signInResult.success) {
-                    log(`✓ 签到成功: ${signInResult.message}`);
-                    successCount++;
-                } else {
-                    log(`✗ 签到失败: ${signInResult.message}`);
-                    failCount++;
-                }
-            } else {
-                log(`✗ 无法获取签到状态: ${listResult.message}`);
+                log(`✗ 签到失败: ${signInResult.message}`);
                 failCount++;
             }
-
-        } catch (error) {
-            log(`✗ 执行出错: ${error.message}`);
+        } else {
+            log(`✗ 无法获取签到状态: ${listResult.message}`);
             failCount++;
         }
 
-        // 账号之间添加分隔符（最后一个账号除外）
-        if (i < ACCOUNTS.length - 1) {
-            log("\n" + "-".repeat(40) + "\n");
-        }
+    } catch (error) {
+        log(`✗ 执行出错: ${error.message}`);
+        failCount++;
     }
 
     const summary = `

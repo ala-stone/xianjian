@@ -8,41 +8,55 @@
 
 - ✅ 支持账号密码登录
 - ✅ 自动每日签到
-- ✅ 支持多账号批量签到
-- ✅ 支持光子服和正式服切换
-- ✅ 签到结果通知
+- ✅ 支持多账号批量签到（v1.1 新增）
+- ✅ 智能检查签到状态，避免重复签到
 - ✅ 详细的日志输出
+- ✅ 签到结果通知
 
 ## 使用步骤
 
 ### 第一步：配置账号信息
 
-打开 `xianjian_signin.js` 文件，修改账号配置区域：
+打开 `xianjian_signin_final.js` 文件，修改账号配置区域：
 
 ```javascript
-// 服务器选择: "photon" = 光子服, "formal" = 正式服
-const SERVER_TYPE = "formal";
-
 // 账号配置（支持多个账号）
 const ACCOUNTS = [
     {
-        username: "your_account_1",  // 替换为你的账号
-        password: "your_password_1",  // 替换为你的密码
-        server: "formal"              // formal=正式服, photon=光子服
+        username: "13569284920",           // 替换为你的账号
+        password: "your_password_1",        // 替换为你的密码
+        role_id: "1410682267143104932",     // 角色ID（通过抓包获取）
+        role_name: "你的角色名",           // 角色名称
+        server_id: "20047",                // 服务器ID（通过抓包获取）
+        server_name: "Q0047 身世浮沉",      // 服务器名称
+        platform: "android",               // 平台：android 或 ios
+        page_id: "8",                      // 页面ID（通常为8）
+        game_id: "69",                     // 游戏ID（通常为69）
+        app_id: "58"                       // 应用ID（通常为58）
     },
     // 添加第二个账号
     {
-        username: "your_account_2",
+        username: "13800138001",
         password: "your_password_2",
-        server: "photon"
+        role_id: "1410682267143104933",
+        role_name: "另一个角色",
+        server_id: "20048",
+        server_name: "Q0048 新手区",
+        platform: "ios",
+        page_id: "8",
+        game_id: "69",
+        app_id: "58"
     }
+    // 可以继续添加更多账号...
 ];
 ```
 
 **重要提示：**
 - 请将 `username` 和 `password` 替换为你的实际账号和密码
-- `server` 字段可选值为：`formal`（正式服）或 `photon`（光子服）
+- `role_id`、`server_id` 等参数需要通过抓包获取
 - 可以添加多个账号，脚本会自动依次执行签到
+- 详细的参数获取方法请参考 `GET_ACCOUNT_INFO.md`
+- 快速配置指南请参考 `MULTI_ACCOUNT_QUICK_START.md`
 
 ### 第二步：上传脚本到圈X
 
@@ -65,7 +79,7 @@ const ACCOUNTS = [
 
 ```ini
 # 仙剑H5自动签到
-0 8 * * * https://你的脚本地址/xianjian_signin.js, tag=仙剑签到, enabled=true
+0 8 * * * https://你的脚本地址/xianjian_signin_final.js, tag=仙剑签到, enabled=true
 ```
 
 **配置说明：**
@@ -105,22 +119,49 @@ const ACCOUNTS = [
 ```javascript
 const ACCOUNTS = [
     {
-        username: "账号1",
-        password: "密码1",
-        server: "formal"
+        username: "13569284920",
+        password: "password1",
+        role_id: "1410682267143104932",
+        role_name: "剑客小强",
+        server_id: "20047",
+        server_name: "Q0047 身世浮沉",
+        platform: "android",
+        page_id: "8",
+        game_id: "69",
+        app_id: "58"
     },
     {
-        username: "账号2",
-        password: "密码2",
-        server: "photon"
+        username: "13800138001",
+        password: "password2",
+        role_id: "1410682267143104933",
+        role_name: "法师阿珍",
+        server_id: "20048",
+        server_name: "Q0048 新手区",
+        platform: "ios",
+        page_id: "8",
+        game_id: "69",
+        app_id: "58"
     },
     {
-        username: "账号3",
-        password: "密码3",
-        server: "formal"
+        username: "13800138002",
+        password: "password3",
+        role_id: "1410682267143104934",
+        role_name: "射手阿飞",
+        server_id: "20049",
+        server_name: "Q0049 热血区",
+        platform: "android",
+        page_id: "8",
+        game_id: "69",
+        app_id: "58"
     }
 ];
 ```
+
+**注意：**
+- 每个账号需要完整的参数信息
+- 不同账号可以来自不同服务器
+- 如果不知道如何获取参数，请参考 `GET_ACCOUNT_INFO.md`
+- 快速配置请查看 `MULTI_ACCOUNT_QUICK_START.md`
 
 ### 通知设置
 
@@ -233,10 +274,36 @@ const NOTIFY_FAIL = true;     // 签到失败是否通知
 3. 确认网络连接正常
 4. 验证账号信息是否正确
 
+## 更新日志
+
+### v1.1 (2026-03-13)
+- ✅ 修复多账号支持问题
+- ✅ 脚本现在可以依次处理所有账号
+- ✅ 优化日志输出，显示每个账号的执行进度
+- ✅ 添加账号间分隔符，便于查看
+- ✅ 更新配置示例文档
+- ✅ 新增多账号快速配置指南
+
+### v1.0 (2026-03-13)
+- ✅ 初始版本发布
+- ✅ 支持单账号自动签到
+- ✅ 支持账号密码登录
+- ✅ 智能检查签到状态
+
+## 相关文档
+
+- **多账号修复说明**: `MULTI_ACCOUNT_FIX.md`
+- **多账号快速开始**: `MULTI_ACCOUNT_QUICK_START.md`
+- **获取账号信息**: `GET_ACCOUNT_INFO.md`
+- **错误排查指南**: `ERROR_FIX_GUIDE.md`
+- **成功案例参考**: `SUCCESS_GUIDE.md`
+- **接口详细说明**: `INTERFACE_GUIDE.md`
+- **配置示例文件**: `config_example.js`
+
 ## 免责声明
 
 本脚本仅供学习和个人使用，请勿用于商业用途。使用本脚本所产生的一切后果由使用者自行承担。
 
 ---
 
-**最后更新时间：2025-03-13**
+**最后更新时间：2026-03-13**

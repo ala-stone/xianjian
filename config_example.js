@@ -14,27 +14,48 @@
 // "photon" = 光子服
 const SERVER_TYPE = "formal";
 
-// 账号配置示例
+// 账号配置示例（完整版，包含所有必需参数）
 const ACCOUNTS = [
     // 第一个账号
     {
-        username: "13800138000",        // 你的手机号或游戏账号
-        password: "your_password_here",  // 你的密码（请替换）
-        server: "formal"                 // 服务器类型
+        username: "13800138000",           // 手机号或游戏账号
+        password: "your_password_here",     // 密码
+        role_id: "1410682267143104932",     // 角色ID（从游戏中获取）
+        role_name: "你的角色名",           // 角色名称
+        server_id: "20047",                // 服务器ID
+        server_name: "服务器名称",         // 服务器名称
+        platform: "android",               // 平台（android/ios）
+        page_id: "8",                      // 页面ID（通常为8）
+        game_id: "69",                     // 游戏ID（通常为69）
+        app_id: "58"                       // 应用ID（通常为58）
     },
-    
-    // 第二个账号（可选）
+
+    // 第二个账号（可选，取消注释并填入真实信息）
     // {
     //     username: "13800138001",
     //     password: "another_password",
-    //     server: "photon"
+    //     role_id: "1410682267143104933",
+    //     role_name: "另一个角色",
+    //     server_id: "20048",
+    //     server_name: "另一个服务器",
+    //     platform: "ios",
+    //     page_id: "8",
+    //     game_id: "69",
+    //     app_id: "58"
     // },
-    
+
     // 第三个账号（可选）
     // {
     //     username: "13800138002",
     //     password: "third_password",
-    //     server: "formal"
+    //     role_id: "1410682267143104934",
+    //     role_name: "第三个角色",
+    //     server_id: "20049",
+    //     server_name: "第三个服务器",
+    //     platform: "android",
+    //     page_id: "8",
+    //     game_id: "69",
+    //     app_id: "58"
     // }
 ];
 
