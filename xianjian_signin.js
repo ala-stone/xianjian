@@ -11,7 +11,7 @@
  * 使用方法：
  * 1. 在圈X配置文件的 [Task_local] 中添加：
  *    # 仙剑签到
- *    0 8 * * * https://github.com/ala-stone/xianjian/blob/main/xianjian_signin.js, tag=仙剑签到, enabled=true
+ *    0 8 * * * https://raw.githubusercontent.com/ala-stone/xianjian/refs/heads/main/xianjian_signin.js, tag=仙剑签到, enabled=true
  * 
  * 2. 脚本配置：
  *    在脚本顶部修改账号配置
@@ -262,4 +262,5 @@ main().catch(error => {
     sendNotification("仙剑签到", "执行异常", error.message);
     $done({ title: "仙剑签到", message: "执行异常: " + error.message });
 });
+
 
