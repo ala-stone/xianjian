@@ -5,8 +5,8 @@
 
 const ACCOUNTS = [
     {
-        username: "13569284920",
-        password: "cgm19930716",
+        username: "1356****920",
+        password: "*****",
         role_id: "1410682267143104932",
         role_name: "node",
         server_id: "20047",
@@ -17,8 +17,8 @@ const ACCOUNTS = [
         app_id: "58"
     },
     {
-        username: "18610509630",
-        password: "cgm19930716",
+        username: "186****9630",
+        password: "*****",
         role_id: "1410682215603558439",
         role_name: "Capybara",
         server_id: "20047",
@@ -358,6 +358,7 @@ main().catch(error => {
     log(`脚本执行异常: ${error.message}`);
     $done({ title: "仙剑签到", message: "执行异常: " + error.message });
 });
+
 
 
 
